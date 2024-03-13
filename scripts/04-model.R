@@ -27,8 +27,6 @@ first_model <- stan_glm(
 
 #### Save model ####
 # Save the constructed model for future reference
-saveRDS(first_model, file = "models/bayesian_model.rds")
-
 saveRDS(
   first_model,
   file = "models/first_model.rds"
