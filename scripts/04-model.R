@@ -1,11 +1,9 @@
 #### Preamble ####
-# Purpose: Models... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Conduct statistical modeling
+# Author: Hailey jang 
+# Date: 11 March, 2024
+# Contact: hailey.jang@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
 
 
 #### Workspace setup ####
@@ -13,25 +11,29 @@ library(tidyverse)
 library(rstanarm)
 
 #### Read data ####
-analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
+modeling_data <- read_csv("data/analysis_data/cleaned_data.csv")
 
 ### Model data ####
-first_model <-
-  stan_glm(
-    formula = flying_time ~ length + width,
-    data = analysis_data,
-    family = gaussian(),
-    prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
-    seed = 853
-  )
+first_model <- stan_glm(
+  formula = Count ~ Gender + Age_group,
+  data = modeling_data,
+  family = gaussian(),
+  prior = normal(0, 23, autoscale = TRUE),
+  prior_intercept = normal(0, 1, autoscale = TRUE),
+  prior_aux = exponential(0.33, autoscale = TRUE),
+  seed = 80
+)
 
 
 #### Save model ####
+# Save the constructed model for future reference
+saveRDS(first_model, file = "models/bayesian_model.rds")
+
 saveRDS(
   first_model,
   file = "models/first_model.rds"
 )
 
+# Notification of script completion
+message("first_model has been successfully created and saved.")
 
