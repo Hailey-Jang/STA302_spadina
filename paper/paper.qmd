@@ -22,6 +22,9 @@ library(palmerpenguins)
 library(knitr)
 library(here)
 library(kableExtra)
+library(readr)
+library(tidyr)
+library(dplyr)
 ```
 
 # Introduction
@@ -34,42 +37,47 @@ The structure of the paper is organized as follows: The data section delves into
 
 # Data {#sec-data}
 
-The study was performed using data from the City of Toronto's **opendatatoronto** database portal, accessed through the 'opendatatoronto' package and processed using the statistical programming environment **R**. The **tidyverse** package facilitated the data and the **kableExtra** package was utilized for enhancing table presentations. Specific to this study, the LaTeX package **"float"** was implemented in the R markdown setting to ensure stable positioning of figures and tables, as detailed by the **"floatplacement{figure}{H}"** command.
+## Data source
 
-Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic record-keeping of homeless mortality to gain a clearer understanding of the prevalence and causative trends of these incidents. The dataset comprises variables such as the **year of death, cause of death, age group, gender**, and **number of deaths**. It classifies individuals into age categories spanning 20 years, starting from **"\<20"** years to **"60+"** years, with gender recorded as either **"Male"** or **"Female"**. The dataset enumerates the deaths annually from **2017** through **2023**, categorizing the causes into distinct classifications like **"Accident", "Drug Toxicity", "Suicide"**, among others.
+The study was performed using data from the City of Toronto's **opendatatoronto** database portal, accessed through the 'opendatatoronto' package and processed using the statistical programming environment **R**. The **tidyverse** package facilitated the data and the **kableExtra** package was utilized for enhancing table presentations. Specific to this study, the LaTeX package was implemented in the R markdown setting to ensure stable positioning of figures and tables.
 
-Focusing on suicide-related fatalities, the dataset was refined to exclude entries marked as **"Unknown"** or **empty**. This filtration led to the construction of two specialized datasets: one delineating the yearly suicide death toll segregated by gender and another by age group. This reorganization necessitated aggregating individual counts from each report into a consolidated figure for these subgroups, facilitating a focused examination of suicide trends across different demographics over the years.
+### Data measurment
 
-Table tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
+Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic record-keeping of homeless mortality to gain a clearer understanding of the prevalence and causative trends of these incidents. The dataset comprises variables such as the year of death, cause of death, age group, gender, and number of deaths. It classifies individuals into age categories spanning 20 years, starting from 20 years to 60+ years, with gender recorded as either Male or Female. The dataset enumerates the deaths annually from 2017 through 2023, categorizing the causes into distinct classifications like Accident, Drug Toxicity", Suicide, among others.
+
+Focusing on suicide-related fatalities, the dataset was refined to exclude entries marked as Unknown or empty. This filtration led to the construction of two specialized datasets: one delineating the yearly suicide death toll segregated by gender and another by age group. This reorganization necessitated aggregating individual counts from each report into a consolidated figure for these subgroups, facilitating a focused examination of suicide trends across different demographics over the years. 
+
+Table @tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
 #| label: tbl-suicide-age-group
 #| tbl-cap: Summary of Suicides by Age Group
 #| echo: false
+#| warning: false
+#| message: false
 
 # Loading the dataset
-suicide_by_age <- read_csv(here::here("data/analysis_data/age_group_deaths_data.csv"))
+suicide_by_age <- read_csv(here::here("data/analysis_data/age_group_deaths_data.csv"), show_col_types = FALSE)
 
-suicide_by_age %>%
-  select(Year, Age_group, Deaths) %>%
-  head(8) %>%
+# Aggregating data to show total counts for each age group
+suicide_summary <- suicide_by_age %>%
+  group_by(Age_group) %>%
+  summarise(Total_Counts = sum(Count)) %>%
+  arrange(desc(Total_Counts))
+
+# Creating a concise table
+suicide_summary %>%
   kable(
-    col.names = c("Year", "Age Group", "Deaths"),
+    col.names = c("Age_group", "Total Counts"),
     digits = 1,
     format = "latex",
     booktabs = TRUE,
     linesep = ""
   ) %>%
-
-  # Ensuring the table maintains its designated position
   kable_styling(latex_options = "HOLD_position")
 ```
 
-Table tbl-suicide-gender-group presents the refined data, specifically spotlighting instances of suicide by gender, and depicting the temporal and numerical specifics of each case.
+Table @tbl-suicide-gender-group presents the refined data, specifically spotlighting instances of suicide by gender, and depicting the temporal and numerical specifics of each case.
 
 ```{r}
 #| label: tbl-suicide-gender-group
@@ -81,24 +89,70 @@ Table tbl-suicide-gender-group presents the refined data, specifically spotlight
 library(knitr)
 
 # Load the dataset containing gender-grouped suicide data
-gender_data <- read_csv(here::here("data/analysis_data/gender_deaths_data.csv"))
+gender_data <- read_csv(here::here("data/analysis_data/gender_group_deaths_data.csv"))
 
 # Refine the age-group dataset to focus on entries specific to suicides
 gender_data |> 
-  select(Year, Gender, Deaths) |>  # Select relevant columns
+  select(Year, sex, count) |>  # Select relevant columns
   slice(1:8) |>  
   kable(
-    col.names = c("Year", "Gender", "Deaths"),  
+    col.names = c("Year", "sex", "count"),  
     digits = 1,  
     booktabs = TRUE,  # Use booktabs style for the table
     linesep = "") |>  
   kable_styling(latex_options = "HOLD_position")
 ```
 
-# Model
+# Model{#sec-model}
 
-## Model set-up
+## Model set-up 
+This section elucidates the development of a logistic regression model, tailored to predict the likelihood of suicide among homeless individuals using demographic factors. Before delving into the model, we visually explore the relationship between suicide rates and demographic variables—age and gender—using ggplot2.
+
+We employ @graph-suicide-gender-group to create a comprehensive visual representation, showcasing the relationship between suicide rates and the key demographic variables, age and gender. This visualization aids in understanding the data distribution and any apparent trends that could influence the model.
+
+```{r}
+#| label: graph-suicide-gender-group
+#| fig-cap: Summary of Suicide Rates by Age and Gender
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(readr)
+
+cleaned_data <- read_csv(here::here("data/analysis_data/cleaned_data.csv"), show_col_types = FALSE)
+
+ggplot(cleaned_data, aes(x = Age_group, y = Count, fill = Gender)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(x = "Age Group",
+       y = "Suicide Rate") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+```
+
+The logistic regression model is designed to predict the probability of suicide cases among homeless individuals, utilizing sociodemographic factors such as age and gender. In a Bayesian logistic regression context, the model's setup can be represented with the following hierarchical structure:
+
+\begin{align}
+y_i | p_i &\sim \mbox{Bernoulli}(p_i) \\
+\log\left(\frac{p_i}{1 - p_i}\right) &= \alpha + \beta_1 \times \text{AgeGroup}_{i1} + \beta_2 \times \text{AgeGroup}_{i2} + \beta_3 \times \text{Gender}_{i} \\
+\alpha &\sim \mbox{Normal}(0, 2.5) \\
+\beta_j &\sim \mbox{Normal}(0, 2.5) \, \text{for } j = 1, 2, 3 \\
+\end{align}
+
+In this adapted model:
+
+- $y_i$ represents the binary outcome for each individual (i.e., the presence or absence of a suicide case).
+- $p_i$ is the probability of observing a suicide case for the ith individual, linked to the predictors through the logistic function.
+- The coefficients $\alpha$,$\beta_1$, $\beta_2$, and $\beta_3$ are assigned Normal prior distributions, reflecting our prior beliefs about these parameters' distributions before observing the data. The Normal priors are centered at 0 with a standard deviation of 2.5, indicating moderate certainty in the prior information.
+- The logit link function (log-odds) is the natural logarithm of the odds $p_i$ / $1 - p_i$ and linearly relates the predictors to the probability of the outcome.
+
+### Model justification 
+This Bayesian logistic regression framework not only estimates the parameters but also quantifies uncertainty in the estimates, providing a more comprehensive understanding of the model's predictions and the effects of the predictors. The use of Normal priors for the coefficients is a standard choice in Bayesian modeling, offering flexibility and conjugacy that facilitate both analytical and computational solutions. The hierarchical model structure allows for the incorporation of additional layers of complexity and variability, accommodating more nuanced relationships and potential hierarchical data structures.
 
 # Results
 
+# Discussion 
+
 # References
+
+
