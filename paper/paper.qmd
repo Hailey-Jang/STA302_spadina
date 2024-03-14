@@ -1,12 +1,11 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "An Analytical Exploration of Homelessness and Suicide in Toronto"
 author: 
   - Hailey Jang
 thanks: "Code and data are available at: https://github.com/Hailey-Jang/Suicide-and-Homelessness.git"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper presents a study focused on addressing the critical issue of suicide among Toronto's homeless population, a significant public health challenge. We developed a risk stratification model using sociodemographic data to identify homeless individuals at high risk for suicide, employing a generalized linear model that incorporates factors like sex and age. The findings, derived from data collected by Toronto Public Health since January 2017, offer insights into the patterns and predictors of suicide attempts within this vulnerable group. The importance of this research lies in its potential to guide interventions, enabling more effective prevention strategies for suicide among the homeless, particularly in settings where immediate access to mental health professionals is limited."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -19,59 +18,81 @@ bibliography: references.bib
 
 library(tidyverse)
 library(palmerpenguins)
+library(knitr)
+library(kableExtra)
 ```
 
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+Homelessness represents a significant public health crisis, with the intersection of inadequate housing and mental health issues exacerbating the risk of suicide among this population. Individuals experiencing homelessness face a 2- to 6-fold increased risk of suicide compared to the general population (Mark 2017). This alarming statistic not only highlights the vulnerability of homeless individuals but also underscores the urgent need for targeted interventions and preventive measures. This paper delves into the development of a risk stratification model designed to identify homeless individuals at an elevated risk of suicide. By integrating sociodemographic data within a generalized linear model, focusing on sex and age as primary factors, our research aims to provide a predictive tool for healthcare providers and social services. The motivation behind this study stems from the critical gap in existing research regarding effective, data-driven strategies for suicide prevention in the homeless community. 
 
-The remainder of this paper is structured as follows. @sec-data....
+Our research methodology involved the analysis of comprehensive data collected by Toronto Public Health, starting from January 2017. This dataset not only provided a foundation for our model but also enriched our understanding of the prevalence and causes of suicide among the homeless. The outcomes of our study revealed significant patterns and predictors that can enhance the effectiveness of suicide prevention strategies, offering a new perspective on addressing this public health challenge. The significance of our findings extends beyond academic interest; they offer practical insights for policymakers, healthcare providers, and social workers who are directly involved in supporting the homeless population. By identifying high-risk individuals, our model can inform targeted interventions, potentially saving lives and allocating resources more efficiently.
 
-
+The structure of the paper is organized as follows: The data section delves into the broader context of the dataset, emphasizing the crucial aspects of measurement relevant to our study. The results section is comprehensive, encompassing various illustrative tables and graphs alongside detailed statistical analyses. Subsequently, the model section elucidates the setup and justification of our chosen modelling approach, ensuring clarity and transparency of our methodology. Lastly, the discussion articulates the study's contributions to our understanding of homelessness and suicide and outlines directions for future research, ensuring a thorough contemplation of the study's broader implications.
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+The study was performed using data from the City of Toronto’s **opendatatoronto** database portal, accessed through the ‘opendatatoronto’ package and processed using the statistical programming environment **R**. The **tidyverse** package facilitated the data and the **kableExtra** package was utilized for enhancing table presentations. Specific to this study, the LaTeX package **"float"** was implemented in the R markdown setting to ensure stable positioning of figures and tables, as detailed by the **"floatplacement{figure}{H}"** command.
+
+Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic record-keeping of homeless mortality to gain a clearer understanding of the prevalence and causative trends of these incidents. The dataset comprises variables such as the **year of death, cause of death, age group, gender**, and **number of deaths**. It classifies individuals into age categories spanning 20 years, starting from **"<20"** years to **"60+"** years, with gender recorded as either **"Male"** or **"Female"**. The dataset enumerates the deaths annually from **2017** through **2023**, categorizing the causes into distinct classifications like **"Accident", "Drug Toxicity", "Suicide"**, among others.
+
+Focusing on suicide-related fatalities, the dataset was refined to exclude entries marked as **"Unknown"** or **empty**. This filtration led to the construction of two specialized datasets: one delineating the yearly suicide death toll segregated by gender and another by age group. This reorganization necessitated aggregating individual counts from each report into a consolidated figure for these subgroups, facilitating a focused examination of suicide trends across different demographics over the years.
+
+Table @tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
 
 ```{r}
 #| label: fig-bills
 #| fig-cap: Bills of penguins
 #| echo: false
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+#| label: tbl-suicide-age-group
+#| tbl-cap: Summary of Suicides by Age Group
+#| echo: false
+
+# Loading the dataset
+suicide_by_age <- read_csv(here::here("data/analysis_data/age_group_deaths_data.csv"))
+
+suicide_by_age %>%
+  select(Year, Age_group, Deaths) %>%
+  head(8) %>%
+  kable(
+    col.names = c("Year", "Age Group", "Deaths"),
+    digits = 1,
+    format = "latex",
+    booktabs = TRUE,
+    linesep = ""
+  ) %>%
+
+  # Ensuring the table maintains its designated position
+  kable_styling(latex_options = "HOLD_position")
 ```
 
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+Table @tbl-suicide-gender-group presents the refined data, specifically spotlighting instances of suicide by gender, and depicting the temporal and numerical specifics of each case. 
 
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: tbl-suicide-gender-group
+#| fig-cap: Summary of suicides Rates by Gender
 #| echo: false
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
+library(knitr)
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+# Load the dataset containing gender-grouped suicide data
+gender_data <- read_csv(here::here("data/analysis_data/gender_deaths_data.csv"))
+
+# Refine the age-group dataset to focus on entries specific to suicides
+gender_data |> 
+  select(Year, Gender, Deaths) |>  # Select relevant columns
+  slice(1:8) |>  
+  kable(
+    col.names = c("Year", "Gender", "Deaths"),  
+    digits = 1,  
+    booktabs = TRUE,  # Use booktabs style for the table
+    linesep = "") |>  
+  kable_styling(latex_options = "HOLD_position")
 ```
-
-Talk way more about it. 
-
-
 
 # Model
 
