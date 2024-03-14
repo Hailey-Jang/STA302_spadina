@@ -3,7 +3,7 @@ title: "My title"
 subtitle: "My subtitle if needed"
 author: 
   - Hailey Jang
-thanks: "Code and data are available at: LINK."
+thanks: "Code and data are available at: https://github.com/Hailey-Jang/Suicide-and-Homelessness.git"
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
