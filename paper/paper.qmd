@@ -4,10 +4,11 @@ author:
   - Hailey Jang
 thanks: "Code and data are available at: https://github.com/Hailey-Jang/Suicide-and-Homelessness.git"
 date: today
-date-format: long
 abstract: "This paper presents a study focused on addressing the critical issue of suicide among Toronto's homeless population, a significant public health challenge. We developed a risk stratification model using sociodemographic data to identify homeless individuals at high risk for suicide, employing a generalized linear model that incorporates factors like sex and age. The findings, derived from data collected by Toronto Public Health since January 2017, offer insights into the patterns and predictors of suicide attempts within this vulnerable group. The importance of this research lies in its potential to guide interventions, enabling more effective prevention strategies for suicide among the homeless, particularly in settings where immediate access to mental health professionals is limited."
-format: pdf
-number-sections: true
+format:
+  pdf:
+    toc: true
+    number-sections: true
 bibliography: references.bib
 ---
 
@@ -19,13 +20,13 @@ bibliography: references.bib
 library(tidyverse)
 library(palmerpenguins)
 library(knitr)
+library(here)
 library(kableExtra)
 ```
 
-
 # Introduction
 
-Homelessness represents a significant public health crisis, with the intersection of inadequate housing and mental health issues exacerbating the risk of suicide among this population. Individuals experiencing homelessness face a 2- to 6-fold increased risk of suicide compared to the general population (Mark 2017). This alarming statistic not only highlights the vulnerability of homeless individuals but also underscores the urgent need for targeted interventions and preventive measures. This paper delves into the development of a risk stratification model designed to identify homeless individuals at an elevated risk of suicide. By integrating sociodemographic data within a generalized linear model, focusing on sex and age as primary factors, our research aims to provide a predictive tool for healthcare providers and social services. The motivation behind this study stems from the critical gap in existing research regarding effective, data-driven strategies for suicide prevention in the homeless community. 
+Homelessness represents a significant public health crisis, with the intersection of inadequate housing and mental health issues exacerbating the risk of suicide among this population. Individuals experiencing homelessness face a 2- to 6-fold increased risk of suicide compared to the general population (@article1). This alarming statistic not only highlights the vulnerability of homeless individuals but also underscores the urgent need for targeted interventions and preventive measures. This paper delves into the development of a risk stratification model designed to identify homeless individuals at an elevated risk of suicide. By integrating sociodemographic data within a generalized linear model, focusing on sex and age as primary factors, our research aims to provide a predictive tool for healthcare providers and social services. The motivation behind this study stems from the critical gap in existing research regarding effective, data-driven strategies for suicide prevention in the homeless community.
 
 Our research methodology involved the analysis of comprehensive data collected by Toronto Public Health, starting from January 2017. This dataset not only provided a foundation for our model but also enriched our understanding of the prevalence and causes of suicide among the homeless. The outcomes of our study revealed significant patterns and predictors that can enhance the effectiveness of suicide prevention strategies, offering a new perspective on addressing this public health challenge. The significance of our findings extends beyond academic interest; they offer practical insights for policymakers, healthcare providers, and social workers who are directly involved in supporting the homeless population. By identifying high-risk individuals, our model can inform targeted interventions, potentially saving lives and allocating resources more efficiently.
 
@@ -33,13 +34,13 @@ The structure of the paper is organized as follows: The data section delves into
 
 # Data {#sec-data}
 
-The study was performed using data from the City of Toronto’s **opendatatoronto** database portal, accessed through the ‘opendatatoronto’ package and processed using the statistical programming environment **R**. The **tidyverse** package facilitated the data and the **kableExtra** package was utilized for enhancing table presentations. Specific to this study, the LaTeX package **"float"** was implemented in the R markdown setting to ensure stable positioning of figures and tables, as detailed by the **"floatplacement{figure}{H}"** command.
+The study was performed using data from the City of Toronto's **opendatatoronto** database portal, accessed through the 'opendatatoronto' package and processed using the statistical programming environment **R**. The **tidyverse** package facilitated the data and the **kableExtra** package was utilized for enhancing table presentations. Specific to this study, the LaTeX package **"float"** was implemented in the R markdown setting to ensure stable positioning of figures and tables, as detailed by the **"floatplacement{figure}{H}"** command.
 
-Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic record-keeping of homeless mortality to gain a clearer understanding of the prevalence and causative trends of these incidents. The dataset comprises variables such as the **year of death, cause of death, age group, gender**, and **number of deaths**. It classifies individuals into age categories spanning 20 years, starting from **"<20"** years to **"60+"** years, with gender recorded as either **"Male"** or **"Female"**. The dataset enumerates the deaths annually from **2017** through **2023**, categorizing the causes into distinct classifications like **"Accident", "Drug Toxicity", "Suicide"**, among others.
+Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic record-keeping of homeless mortality to gain a clearer understanding of the prevalence and causative trends of these incidents. The dataset comprises variables such as the **year of death, cause of death, age group, gender**, and **number of deaths**. It classifies individuals into age categories spanning 20 years, starting from **"\<20"** years to **"60+"** years, with gender recorded as either **"Male"** or **"Female"**. The dataset enumerates the deaths annually from **2017** through **2023**, categorizing the causes into distinct classifications like **"Accident", "Drug Toxicity", "Suicide"**, among others.
 
 Focusing on suicide-related fatalities, the dataset was refined to exclude entries marked as **"Unknown"** or **empty**. This filtration led to the construction of two specialized datasets: one delineating the yearly suicide death toll segregated by gender and another by age group. This reorganization necessitated aggregating individual counts from each report into a consolidated figure for these subgroups, facilitating a focused examination of suicide trends across different demographics over the years.
 
-Table @tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
+Table tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
 
 ```{r}
 #| label: fig-bills
@@ -68,7 +69,7 @@ suicide_by_age %>%
   kable_styling(latex_options = "HOLD_position")
 ```
 
-Table @tbl-suicide-gender-group presents the refined data, specifically spotlighting instances of suicide by gender, and depicting the temporal and numerical specifics of each case. 
+Table tbl-suicide-gender-group presents the refined data, specifically spotlighting instances of suicide by gender, and depicting the temporal and numerical specifics of each case.
 
 ```{r}
 #| label: tbl-suicide-gender-group
@@ -96,146 +97,8 @@ gender_data |>
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
 ## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
-
-\newpage
-
-\appendix
-
-# Appendix {-}
-
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
-
-\newpage
-
-
 # References
-
-
