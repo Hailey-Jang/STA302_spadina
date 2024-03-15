@@ -1,11 +1,8 @@
-# Starter folder
+# Suicide and Homelessness 
 
 ## Overview
 
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
-
-To use this folder, click the green "Code" button", then "Download ZIP". Move the downloaded folder to where you want to work on your own computer, and then modify it to suit.
-
+This paper presents a study focused on addressing the critical issue of suicide among Toronto's homeless population, a significant public health challenge. The analysis was performed in `R`(R Core Team 2021) to develop a risk stratification model using sociodemographic data from *opendatatoronto*.
 
 ## File Structure
 
@@ -21,4 +18,4 @@ The repo is structured as:
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of the auto-complete tool, Codriver. The abstract and introduction were written with the help of ChatHorse and the entire chat history is available in inputs/llms/usage.txt.
+This project employed ChatGPT to aid in various stages, including research, development, and writing tasks.
