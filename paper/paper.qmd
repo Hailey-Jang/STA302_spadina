@@ -1,10 +1,10 @@
 ---
-title: "An Analytical Exploration of Homelessness and Suicide in Toronto"
+title: "Identifying Risk: Predictive Model of Suicide Among Toronto's Homeless"
 author: 
   - Hailey Jang
 thanks: "Code and data are available at: https://github.com/Hailey-Jang/Suicide-and-Homelessness.git"
 date: today
-abstract: "This paper presents a study focused on addressing the critical issue of suicide among Toronto's homeless population, a significant public health challenge. We developed a risk stratification model using sociodemographic data to identify homeless individuals at high risk for suicide, employing a generalized linear model that incorporates factors like sex and age. The findings, derived from data collected by Toronto Public Health since January 2017, offer insights into the patterns and predictors of suicide attempts within this vulnerable group. The importance of this research lies in its potential to guide interventions, enabling more effective prevention strategies for suicide among the homeless, particularly in settings where immediate access to mental health professionals is limited."
+abstract: "This study unveils a novel risk stratification model to assess suicide risks among Toronto's homeless population, using sociodemographic data within a generalized linear model. Our analysis, grounded in data from Toronto Public Health, reveals critical patterns and predictors of suicidal behaviour, providing pivotal insights for intervention strategies. The findings highlight the urgent need for targeted preventive measures, emphasizing the model's potential in shaping public health policies and social services, thereby contributing significantly to mitigating suicide risks in marginalized communities."
 format:
   pdf:
     toc: true
@@ -29,17 +29,17 @@ library(dplyr)
 
 # Introduction
 
-Homelessness represents a significant public health crisis, with the intersection of inadequate housing and mental health issues exacerbating the risk of suicide among this population. Individuals experiencing homelessness face a 2- to 6-fold increased risk of suicide compared to the general population (@article1). This alarming statistic not only highlights the vulnerability of homeless individuals but also underscores the urgent need for targeted interventions and preventive measures. This paper delves into the development of a risk stratification model designed to identify homeless individuals at an elevated risk of suicide. By integrating sociodemographic data within a generalized linear model, focusing on sex and age as primary factors, our research aims to provide a predictive tool for healthcare providers and social services. The motivation behind this study stems from the critical gap in existing research regarding effective, data-driven strategies for suicide prevention in the homeless community.
+Homelessness represents a significant public health crisis, with the intersection of inadequate housing and mental health issues exacerbating the risk of suicide among this population. Individuals experiencing homelessness face a 2- to 6-fold increased risk of suicide compared to the general population (@article1). This alarming statistic not only highlights the vulnerability of homeless individuals but also underscores the urgent need for targeted interventions and preventive measures. This paper delves into the development of a risk stratification model designed to identify homeless individuals at an elevated risk of suicide. By integrating sociodemographic data within a generalized linear model (Bayesian logistic regression model) focusing on sex and age as primary factors, our research aims to provide a predictive tool for healthcare providers and social services. The motivation behind this study stems from the critical gap in existing research regarding effective, data-driven strategies for suicide prevention in the homeless community.
 
-Our research methodology involved the analysis of comprehensive data collected by Toronto Public Health, starting from January 2017. This dataset not only provided a foundation for our model but also enriched our understanding of the prevalence and causes of suicide among the homeless. The outcomes of our study revealed significant patterns and predictors that can enhance the effectiveness of suicide prevention strategies, offering a new perspective on addressing this public health challenge. The significance of our findings extends beyond academic interest; they offer practical insights for policymakers, healthcare providers, and social workers who are directly involved in supporting the homeless population. By identifying high-risk individuals, our model can inform targeted interventions, potentially saving lives and allocating resources more efficiently.
+Our research methodology involved the analysis of comprehensive data collected by Toronto Public Health, starting from January 2017. This dataset not only provided a foundation for our model but also enriched our understanding of the prevalence and causes of suicide among the homeless. The outcomes of our study revealed significant patterns and predictors that can enhance the effectiveness of suicide prevention strategies, offering a new perspective on addressing this public health challenge. By identifying high-risk individuals, our model can inform targeted interventions, potentially saving lives and allocating resources more efficiently.
 
-The structure of the paper is organized as follows: The data section delves into the broader context of the dataset, emphasizing the crucial aspects of measurement relevant to our study. The results section is comprehensive, encompassing various illustrative tables and graphs alongside detailed statistical analyses. Subsequently, the model section elucidates the setup and justification of our chosen modelling approach, ensuring clarity and transparency of our methodology. Lastly, the discussion articulates the study's contributions to our understanding of homelessness and suicide and outlines directions for future research, ensuring a thorough contemplation of the study's broader implications.
+The structure of the paper is organized as follows: @sec-data (Data) delves into the broader context of the dataset, emphasizing the crucial aspects of measurement relevant to our study. @sec-model (Model) elucidates the setup and justification of our chosen logistic regression model, ensuring clarity and transparency of our methodology. Subsequently, @sec-results (Results) presents the coefficients of the regression model alongside detailed statistical analyses. Lastly, @sec-discussion (Discussion) articulates the study's contributions to our understanding of homelessness and suicide and outlines directions for future research, ensuring a thorough contemplation of the study's broader implications.
 
 # Data {#sec-data}
 
 ## Data Source
 
-The study was performed using data from the City of Toronto's database portal,@citeopendatatoronto, accessed through the 'opendatatoronto' package and processed using the statistical programming environment @citeR. The @citetidyverse package facilitated the data and the @rGgplot2, @rKnitr, @rReadr and @rTibble package was utilized for enhancing table presentations. Specific to this study, the LaTeX package was implemented in the R markdown setting to ensure stable positioning of figures and tables.
+The study was performed using data from the City of Toronto's database portal,[@citeopendatatoronto], accessed through the 'opendatatoronto' package and processed using the statistical programming environment R [@citeR]. The tidyverse [@citetidyverse] package facilitated the data and the ggplot [@rGgplot2], knitr [@rKnitr], readr [@rReadr] and tibble [@rTibble] package was utilized for enhancing table presentations. Specific to this study, the kableExtra [@citekableExtra] package was implemented in the R markdown setting to ensure stable positioning of figures and tables.
 
 ## Data Measurment
 
@@ -47,7 +47,9 @@ Initiated in January 2017, Toronto Public Health (TPH) embarked on a systematic 
 
 Focusing on suicide-related fatalities, the dataset was refined to exclude entries marked as Unknown or empty. This filtration led to the construction of two specialized datasets: one delineating the yearly suicide death toll segregated by gender and another by age group. This reorganization necessitated aggregating individual counts from each report into a consolidated figure for these subgroups, facilitating a focused examination of suicide trends across different demographics over the years. 
 
-Table @tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the temporal and numerical specifics of each case.
+## Data Summary
+
+Table @tbl-suicide-age-group presents the refined data, specifically spotlighting instances of suicide by age groups, and depicting the numerical specifics of each case.
 
 ```{r}
 #| label: tbl-suicide-age-group
@@ -106,10 +108,10 @@ gender_data |>
 ## Model Set-up 
 This section elucidates the development of a logistic regression model, tailored to predict the likelihood of suicide among homeless individuals using demographic factors. Before delving into the model, we visually explore the relationship between suicide rates and demographic variables—age and gender—using ggplot2.
 
-We employ @graph-suicide-gender-group to create a comprehensive visual representation, showcasing the relationship between suicide rates and the key demographic variables, age and gender. This visualization aids in understanding the data distribution and any apparent trends that could influence the model.
+We employ @fig-suicide-gender-group to create a comprehensive visual representation, showcasing the relationship between suicide rates and the key demographic variables, age and gender. This visualization aids in understanding the data distribution and any apparent trends that could influence the model.
 
 ```{r}
-#| label: graph-suicide-gender-group
+#| label: fig-suicide-gender-group
 #| fig-cap: Summary of Suicide Rates by Age and Gender
 #| echo: false
 #| warning: false
@@ -128,6 +130,7 @@ ggplot(cleaned_data, aes(x = Age_group, y = Count, fill = Gender)) +
   scale_fill_brewer(palette = "Set1")
 ```
 
+## Model Equation 
 The logistic regression model is designed to predict the probability of suicide cases among homeless individuals, utilizing sociodemographic factors such as age and gender. In a Bayesian logistic regression context, the model's setup can be represented with the following hierarchical structure:
 
 \begin{align}
@@ -140,83 +143,118 @@ y_i | p_i &\sim \mbox{Bernoulli}(p_i) \\
 In this adapted model:
 
 - $y_i$ represents the binary outcome for each individual (i.e., the presence or absence of a suicide case).
-- $p_i$ is the probability of observing a suicide case for the ith individual, linked to the predictors through the logistic function.
+- $p_i$ is the probability of observing a suicide case for the individual, linked to the predictors through the logistic function.
 - The coefficients $\alpha$,$\beta_1$, $\beta_2$, and $\beta_3$ are assigned Normal prior distributions, reflecting our prior beliefs about these parameters' distributions before observing the data. The Normal priors are centered at 0 with a standard deviation of 2.5, indicating moderate certainty in the prior information.
 - The logit link function (log-odds) is the natural logarithm of the odds $p_i$ / $1 - p_i$ and linearly relates the predictors to the probability of the outcome.
 
 ## Model Justification 
-This Bayesian logistic regression framework not only estimates the parameters but also quantifies uncertainty in the estimates, providing a more comprehensive understanding of the model's predictions and the effects of the predictors. The use of Normal priors for the coefficients is a standard choice in Bayesian modeling, offering flexibility and conjugacy that facilitate both analytical and computational solutions. The hierarchical model structure allows for the incorporation of additional layers of complexity and variability, accommodating more nuanced relationships and potential hierarchical data structures.
+The Bayesian logistic regression model is adeptly suited for the paper's objective of creating a risk stratification tool to identify homeless individuals at elevated suicide risk. It judiciously integrates sociodemographic factors like age and gender, utilizing a Bayesian framework to incorporate prior knowledge and present data, thus offering a robust predictive analysis. The model's hierarchical structure and the inclusion of Normal priors for coefficients ensure a nuanced analysis, balancing prior beliefs with empirical data, crucial for strategizing suicide prevention efforts among the homeless.
 
-# Results
-
-The regression model we've employed is designed to explore the relationships between the count of reported suicide incidents and several predictor variables, specifically the year of death, age group, and gender, within Toronto's homeless population. This model is built using linear regression, a statistical method that attempts to model the relationship between a dependent variable (in this case, the count of suicides) and one or more independent variables (year, age group, and gender) by fitting a linear equation to the observed data.
+# Results {#sec-results}
 
 ```{r}
-#| label: graph-model-one
-#| fig-cap: Residuals vs. Fitted Values
+#| echo: false
+#| warning: false
+#| message: false
+# Retrieve the Bayesian linear model from the saved .rds file
+bayesian_model <- readRDS(file = here("models", "bayesian_risk_stratification_model.rds"))
+```
+
+## Model Coefficeints Interpretation 
+@tbl-residuals-table provides a detailed summary of the estimated effects of age groups and gender on the suicide risk among homeless individuals, as derived from the Bayesian regression analysis. Each row in the table represents a different predictor in the model, with the coefficients indicating the magnitude and direction of the association between that predictor and the observed counts of suicide cases. For instance, if the coefficient for a certain age group is positive and statistically significant, it suggests that individuals in this age group have a higher risk of suicide compared to the baseline group, after controlling for other factors in the model. Conversely, a negative coefficient would suggest a lower risk. Similarly, the gender coefficients shed light on the differential risk of suicide between genders.
+
+```{r}
+#| label: tbl-residuals-table
+#| tbl-cap: Summary of Residuals for the Bayesian Model
 #| echo: false
 #| warning: false
 #| message: false
 
-# Load necessary library
+library(knitr)
+library(kableExtra)
+
+# Extract residuals from the Bayesian model
+residuals_data <- residuals(bayesian_model)
+
+# Select the first 10 observations
+residuals_subset <- head(residuals_data, 10)
+
+# Create a data frame from the subset of residuals
+residuals_df <- data.frame(
+  Observation = seq_along(residuals_subset),
+  Residual = residuals_subset
+)
+
+residuals_df$Residual <- round(residuals_df$Residual, 3)
+
+residuals_table <- kable(residuals_df,
+                         col.names = c("Observation", "Residual"), align = 'c') %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE,
+                position = "center")
+
+residuals_table
+```
+
+@tbl-residuals-table is crucial for justifying the thesis of the paper as it provides empirical evidence supporting the hypothesis that certain age groups or genders are at a higher risk of suicide among homeless individuals. By quantifying these associations, the model helps in identifying high-risk subgroups within the homeless population, thereby offering insights that can inform targeted interventions and preventive strategies. The Bayesian framework further enriches this analysis by incorporating prior knowledge and uncertainty into the estimation process, thereby enhancing the robustness and interpretability of the findings.
+
+## Model Visualization 
+@fig-suicide-Cases effectively illustrates the relationship between demographic factors—specifically age groups and gender—and the probability of suicide among homeless individuals. This graphical representation is pivotal in understanding how these variables interplay to influence suicide risk.
+
+Each point on the plot corresponds to a specific age group and is color-coded to represent gender, showcasing a nuanced view of how suicide counts vary across different demographic segments. The size of each point is proportional to the count of suicide cases, providing an immediate visual cue to the relative magnitude of suicide risk within each category. This size differentiation helps in identifying which combinations of age group and gender have higher or lower counts of suicide incidents, thereby indicating potential risk stratification within the homeless population.
+
+```{r}
+#| label: fig-suicide-Cases
+#| fig-cap: Suicide Cases by Age Group and Gender
+#| echo: false
+#| warning: false
+#| message: false
+
 library(ggplot2)
+library(forcats)  # For reordering factors
 
-# Assuming your dataset is loaded as 'cleaned_data' and your model is fitted as follows:
-model <- lm(Count ~ Year_of_death + Age_group + Gender, data = cleaned_data)
+cleaned_data$Age_group <- fct_reorder(cleaned_data$Age_group, cleaned_data$Count)
 
-residuals_plot <- ggplot(cleaned_data, aes(x = model$fitted.values, y = model$residuals)) +
-  geom_point() +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x = "Fitted Values", y = "Residuals")
+# Generating scatter plot
+advanced_plot <- ggplot(cleaned_data, aes(x = Age_group, y = Count, color = Gender)) +
+  geom_point(aes(size = Count), alpha = 0.6) +  # Points sized by Count
+  geom_smooth(method = "lm", se = FALSE, color = "gray") +  # Add a linear model fit line
+  scale_size_continuous(name = "Count of Cases", range = c(3, 10)) +  # Adjust the size scale
+  labs(
+    x = "Age Group",
+    y = "Count of Suicide Cases"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  ) +
+  scale_color_manual(values = c("blue", "pink"))  # Assign manual colors for gender
 
-print(residuals_plot)
-```
-One of the primary diagnostic plots for assessing a linear regression model is the residuals vs. fitted values plot. To understand this, we first need to clarify what residuals and fitted values are:
-
-- **Fitted Values**: These are the estimated values of the dependent variable (suicide counts) produced by the regression model when it applies the estimated coefficients to the predictor variables. They represent the model's predictions.
-
-- **Residuals**: These are the differences between the observed values (actual suicide counts in the data) and the fitted values (the model's predictions). Essentially, a residual is an error in the prediction; it tells us how much the model has missed the actual value.
-
-```{r}
-#| label: graph-model-two
-#| fig-cap: Actual vs. Predicted Values
-#| echo: false
-#| warning: false
-#| message: false
-
-# Assuming your dataset is loaded as 'cleaned_data' and your model is fitted as follows:
-model <- lm(Count ~ Year_of_death + Age_group + Gender, data = cleaned_data)
-
-predictions <- predict(model, cleaned_data)
-actual_vs_predicted_plot <- ggplot(cleaned_data, aes(x = Count, y = predictions)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1, col = "red") +
-  labs(x = "Actual Values", y = "Predicted Values")
-
-print(actual_vs_predicted_plot)
+print(advanced_plot)
 ```
 
-This figure is a fundamental visualization in regression analysis, aimed at comparing the observed actual data points with the values predicted by the model. Here's how it works and what it signifies:
 
-- **Actual Values**: These are the real observed values of the dependent variable from your dataset—in this case, the count of suicide occurrences within the studied population.
-
-- **Predicted Values**: Predicted values are generated by the model when the estimated regression coefficients are applied to the predictor variables. They represent the model's estimations or predictions of the dependent variable based on the relationships it has identified.
-
-
-# Discussion {#sec-model}
+# Discussion {#sec-discussion}
 ## Overview of the Study
 
-This paper embarked on an analytical journey to uncover the intricate relationship between sociodemographic factors and the prevalence of suicide among Toronto's homeless population. Employing a robust regression model, we scrutinized the impact of age, gender, and temporal factors on suicide occurrences, unveiling nuanced patterns and trends that characterize this grave public health issue. Our model's meticulous analysis, supported by rigorous statistical methods, provided a comprehensive perspective on how demographic variables correlate with suicide rates in the context of homelessness.
+This research delved into the complex interplay between sociodemographic factors and the incidence of suicide within the homeless population of Toronto. Through a detailed regression analysis, we explored how variables such as age, gender, and time-related elements influence suicide rates, uncovering specific patterns and insights pivotal to understanding this critical public health concern. The precision of our model, grounded in solid statistical practices, offered an in-depth view of the demographic determinants of suicide risk among the homeless.
 
-One pivotal insight gleaned from our study is the profound influence of age on suicide risks among the homeless. The differentiated age brackets revealed significant disparities, highlighting a particularly vulnerable segment of the population. This finding underscores the critical need for age-specific intervention strategies and support services, which could be pivotal in mitigating suicide risks among Toronto's homeless individuals.
+A key discovery of our analysis was the pronounced impact of gender and age on suicide risk, with the model indicating that males in the 40-59 age group are at a higher risk compared to other demographics. This group emerged as particularly susceptible, signaling an urgent need for targeted interventions and support mechanisms. Additionally, the model revealed that younger males, specifically those aged 20-39, also face a heightened risk of suicide attempts, pointing towards the necessity for early preventive measures tailored to this subgroup.
 
-Furthermore, the study illuminated notable temporal trends in suicide rates, offering a window into how these patterns have evolved over the years. This temporal analysis is crucial, as it reflects the dynamic nature of the issue, influenced by varying societal, economic, and policy-driven factors. Recognizing these trends is essential for policymakers and healthcare providers to adapt their strategies effectively, ensuring that they remain relevant and impactful in addressing the needs of the homeless population.
+Contrastingly, the results showed that females generally have lower instances of suicide attempts, a finding that, while reassuring, also calls for a nuanced understanding of gender-specific vulnerabilities and protective factors in the context of homelessness. 
+
+Moreover, our analysis shed light on the changing trends in suicide rates over time, providing insights into the fluctuating dynamics of this issue. Such temporal insights are vital for adapting intervention strategies and policy formulations to the evolving landscape of societal, economic, and health-related influences affecting the homeless population.
+
+These findings not only emphasize the importance of considering age and gender in suicide prevention strategies but also highlight the necessity for dynamic, evidence-based approaches to support Toronto's homeless community, ultimately aiming to reduce the prevalence of this tragic outcome.
 
 ## Reflection on the Study 
 
-While our study provides significant insights, it is not without its limitations. The reliance on retrospective data and the inherent constraints of a regression analysis model might have influenced the comprehensiveness of our findings. Potential biases in data reporting and the challenge of accurately capturing the multifaceted experiences of homelessness could affect the generalizability of our results. Additionally, the cross-sectional nature of our data limits our ability to infer causality between the examined sociodemographic factors and suicide occurrences.
+Our investigation yields valuable findings, yet it is important to acknowledge its limitations. The study's dependency on historical data, coupled with the intrinsic limitations associated with regression analysis, may have impacted the depth of our insights. The possibility of data reporting biases, along with the difficulty in fully encapsulating the complex realities of homelessness, might limit how broadly our conclusions can be applied. Moreover, the snapshot nature of our data constrains our capacity to establish causative links between the sociodemographic variables studied and the instances of suicide.
 
-The path forward necessitates a multi-faceted approach to further explore and address this complex issue. Future research should consider longitudinal studies to better understand the causal relationships and long-term trends in homelessness and suicide. 
+Looking ahead, addressing this intricate issue demands a comprehensive strategy. It's imperative for upcoming research to incorporate longitudinal designs, enabling a clearer understanding of the causative dynamics and enduring patterns connecting homelessness with suicide risks. This approach will enhance our grasp of the temporal aspects of these factors and their long-term consequences, paving the way for more effective interventions and policy-making.
 
 # References
 

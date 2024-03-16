@@ -7,31 +7,31 @@
 
 
 #### Workspace setup ####
-library(tidyverse)
+library(readr)
 library(rstanarm)
+library(here)
 
 #### Read data ####
-modeling_data <- read_csv("data/analysis_data/cleaned_data.csv")
+cleaned_data <- read_csv(here("data", "analysis_data", "cleaned_data.csv"))
 
-### Model data ####
-first_model <- stan_glm(
-  formula = Count ~ Gender + Age_group,
-  data = modeling_data,
-  family = gaussian(),
-  prior = normal(0, 23, autoscale = TRUE),
-  prior_intercept = normal(0, 1, autoscale = TRUE),
-  prior_aux = exponential(0.33, autoscale = TRUE),
-  seed = 80
+# Ensure reproducibility
+set.seed(2024)
+
+#### Model data ####
+bayesian_model <- stan_glm(
+  Count ~ Age_group + Gender, 
+  data = cleaned_data,
+  family = poisson(link = "log"),
+  seed = 2024 # Set the seed for reproducibility
 )
 
+# Summary of the model to check for immediate red flags
+summary(bayesian_model)
 
 #### Save model ####
-# Save the constructed model for future reference
+# Save the Bayesian model as an .rds file to the 'models' folder
 saveRDS(
-  first_model,
-  file = "models/first_model.rds"
+  bayesian_model,
+  file = here("models", "bayesian_risk_stratification_model.rds")
 )
-
-# Notification of script completion
-message("first_model has been successfully created and saved.")
 
